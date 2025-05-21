@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,105 +10,46 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useAuth } from '@/context/AuthContext';
 import { Coffee, LogOut, Search, Star, ArrowDown, ArrowUp, Phone, Mail, Download, Filter } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
-// Lead data interface
+// Interfaces para os dados das tabelas do Supabase
+interface Manus2Lead {
+  "Nome Comercial": string | null;
+  "Tipo de Empresa": string | null;
+  "Localização": string | null;
+  "Tamanho do Negócio": string | null;
+  "Telefone": string | null;
+  "Email": string | null;
+  "Website": string | null;
+  "Redes Sociais": string | null;
+  "Prioridade": string | null;
+  "Observações": string | null;
+}
+
+interface Manus3Lead {
+  "Nome": string | null;
+  "Tipo": string | null;
+  "Cidade/Estado": string | null;
+  "Tamanho": string | null;
+  "Contato": string | null;
+  "Tipo de Café": string | null;
+  "Observações": string | null;
+}
+
+// Interface unificada para exibição de leads
 interface Lead {
   id: string;
   company: string;
   category: string;
   contact: string;
-  email: string;
-  phone: string;
+  email: string | null;
+  phone: string | null;
   rating: number;
   lastPurchase?: string;
   potentialValue: number;
   location: string;
+  source: string;
 }
-
-// Sample leads data (would come from Supabase tables)
-const mockLeads: Lead[] = [
-  { 
-    id: '1', 
-    company: 'Café Gourmet Express', 
-    category: 'Cafeteria', 
-    contact: 'Ana Silva', 
-    email: 'ana@cafegourmet.com', 
-    phone: '(11) 98765-4321', 
-    rating: 5, 
-    lastPurchase: '15/04/2023', 
-    potentialValue: 15000, 
-    location: 'São Paulo, SP' 
-  },
-  { 
-    id: '2', 
-    company: 'Empório Café & Cia', 
-    category: 'Empório', 
-    contact: 'João Oliveira', 
-    email: 'joao@emporiocafe.com', 
-    phone: '(11) 99876-5432', 
-    rating: 4, 
-    lastPurchase: '22/03/2023', 
-    potentialValue: 8500, 
-    location: 'Campinas, SP' 
-  },
-  { 
-    id: '3', 
-    company: 'Torrefação Premium', 
-    category: 'Torrefação', 
-    contact: 'Carlos Mendes', 
-    email: 'carlos@torrepremium.com', 
-    phone: '(11) 97654-3210', 
-    rating: 5, 
-    potentialValue: 25000, 
-    location: 'Ribeirão Preto, SP' 
-  },
-  { 
-    id: '4', 
-    company: 'Café da Serra', 
-    category: 'Cafeteria', 
-    contact: 'Marina Costa', 
-    email: 'marina@cafeserra.com', 
-    phone: '(35) 98765-4321', 
-    rating: 3, 
-    lastPurchase: '10/01/2023', 
-    potentialValue: 5000, 
-    location: 'Poços de Caldas, MG' 
-  },
-  { 
-    id: '5', 
-    company: 'Armazém do Café', 
-    category: 'Empório', 
-    contact: 'Pedro Santos', 
-    email: 'pedro@armazemcafe.com', 
-    phone: '(19) 98888-7777', 
-    rating: 4, 
-    potentialValue: 12000, 
-    location: 'Americana, SP' 
-  },
-  { 
-    id: '6', 
-    company: 'Café & Grãos Especiais', 
-    category: 'Torrefação', 
-    contact: 'Luiza Almeida', 
-    email: 'luiza@cafeegraos.com', 
-    phone: '(11) 96543-2109', 
-    rating: 5, 
-    lastPurchase: '05/05/2023', 
-    potentialValue: 18000, 
-    location: 'São Paulo, SP' 
-  },
-  { 
-    id: '7', 
-    company: 'Empório Grão Fino', 
-    category: 'Empório', 
-    contact: 'Roberto Lima', 
-    email: 'roberto@graofino.com', 
-    phone: '(15) 99988-7766', 
-    rating: 3, 
-    potentialValue: 7000, 
-    location: 'Sorocaba, SP' 
-  }
-];
 
 const ResultsPage = () => {
   const navigate = useNavigate();
@@ -117,9 +59,100 @@ const ResultsPage = () => {
     { key: 'rating', direction: 'desc' }
   );
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchLeads = async () => {
+      setIsLoading(true);
+      try {
+        // Buscar dados da tabela Manus2.0
+        const { data: manus2Data, error: manus2Error } = await supabase
+          .from('Manus2.0')
+          .select('*');
+        
+        if (manus2Error) throw manus2Error;
+        
+        // Buscar dados da tabela Manus3.0
+        const { data: manus3Data, error: manus3Error } = await supabase
+          .from('Manus3.0')
+          .select('*');
+        
+        if (manus3Error) throw manus3Error;
+        
+        // Conversão dos dados para o formato unificado
+        const manus2Leads: Lead[] = (manus2Data || []).map((lead: Manus2Lead, index: number) => ({
+          id: `manus2-${index}`,
+          company: lead["Nome Comercial"] || "Sem nome",
+          category: lead["Tipo de Empresa"] || "Não classificado",
+          contact: "Não especificado",
+          email: lead["Email"],
+          phone: lead["Telefone"],
+          rating: lead["Prioridade"] === "Alta" ? 5 : lead["Prioridade"] === "Média" ? 3 : 1,
+          potentialValue: getRatingValue(lead["Prioridade"]),
+          location: lead["Localização"] || "Não especificada",
+          source: "Manus2.0"
+        }));
+        
+        const manus3Leads: Lead[] = (manus3Data || []).map((lead: Manus3Lead, index: number) => ({
+          id: `manus3-${index}`,
+          company: lead["Nome"] || "Sem nome",
+          category: lead["Tipo"] || "Não classificado",
+          contact: lead["Contato"] || "Não especificado",
+          email: null,
+          phone: null,
+          rating: getRatingFromSize(lead["Tamanho"]),
+          potentialValue: getValueFromSize(lead["Tamanho"]),
+          location: lead["Cidade/Estado"] || "Não especificada",
+          source: "Manus3.0"
+        }));
+        
+        // Combinar os leads
+        setLeads([...manus2Leads, ...manus3Leads]);
+      } catch (error) {
+        console.error("Erro ao buscar dados:", error);
+        toast.error("Não foi possível carregar os leads");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchLeads();
+  }, []);
+  
+  // Funções auxiliares para conversão de dados
+  const getRatingValue = (priority: string | null): number => {
+    if (!priority) return 5000;
+    switch(priority) {
+      case "Alta": return 15000;
+      case "Média": return 10000;
+      case "Baixa": return 5000;
+      default: return 5000;
+    }
+  };
+  
+  const getRatingFromSize = (size: string | null): number => {
+    if (!size) return 3;
+    switch(size) {
+      case "Grande": return 5;
+      case "Médio": return 4;
+      case "Pequeno": return 3;
+      default: return 3;
+    }
+  };
+  
+  const getValueFromSize = (size: string | null): number => {
+    if (!size) return 8000;
+    switch(size) {
+      case "Grande": return 20000;
+      case "Médio": return 12000;
+      case "Pequeno": return 5000;
+      default: return 8000;
+    }
+  };
   
   // Sorting function
-  const sortedLeads = [...mockLeads].sort((a, b) => {
+  const sortedLeads = [...leads].sort((a, b) => {
     if (!sortConfig) return 0;
     
     if (a[sortConfig.key] < b[sortConfig.key]) {
@@ -166,14 +199,21 @@ const ResultsPage = () => {
   };
   
   // Handle contact
-  const handleContact = (email: string) => {
-    toast.success(`Iniciando contato com ${email}`);
+  const handleContact = (email: string | null) => {
+    if (email) {
+      toast.success(`Iniciando contato com ${email}`);
+    } else {
+      toast.info("Email não disponível para este lead");
+    }
   };
   
   // Handle new search
   const handleNewSearch = () => {
     navigate('/filtros');
   };
+
+  // Get unique categories for filter
+  const categories = [...new Set(leads.map(lead => lead.category))].filter(Boolean);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -184,7 +224,7 @@ const ResultsPage = () => {
           <h1 className="text-xl font-medium">Café Granchelli</h1>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-sm opacity-75">Olá, {user?.name || 'Usuário'}</span>
+          <span className="text-sm opacity-75">Olá, {user?.email?.split('@')[0] || 'Usuário'}</span>
           <Button 
             variant="ghost" 
             size="icon" 
@@ -210,7 +250,7 @@ const ResultsPage = () => {
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total de Leads</p>
-                <p className="text-2xl font-bold">{mockLeads.length}</p>
+                <p className="text-2xl font-bold">{leads.length}</p>
               </div>
               <div className="w-12 h-12 bg-coffee-brown/10 rounded-full flex items-center justify-center">
                 <Coffee className="text-coffee-brown" size={24} />
@@ -226,7 +266,7 @@ const ResultsPage = () => {
                   {new Intl.NumberFormat('pt-BR', {
                     style: 'currency',
                     currency: 'BRL'
-                  }).format(mockLeads.reduce((sum, lead) => sum + lead.potentialValue, 0) / 1000)}k
+                  }).format(leads.reduce((sum, lead) => sum + lead.potentialValue, 0) / 1000)}k
                 </p>
               </div>
               <div className="w-12 h-12 bg-coffee-gold/10 rounded-full flex items-center justify-center">
@@ -240,7 +280,7 @@ const ResultsPage = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Top Rating</p>
                 <p className="text-2xl font-bold">
-                  {mockLeads.filter(lead => lead.rating === 5).length} leads
+                  {leads.filter(lead => lead.rating === 5).length} leads
                 </p>
               </div>
               <div className="w-12 h-12 bg-coffee-olive/10 rounded-full flex items-center justify-center">
@@ -273,15 +313,14 @@ const ResultsPage = () => {
               <DropdownMenuItem onClick={() => setFilterCategory(null)}>
                 Todos os tipos
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterCategory('Cafeteria')}>
-                Cafeteria
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterCategory('Empório')}>
-                Empório
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterCategory('Torrefação')}>
-                Torrefação
-              </DropdownMenuItem>
+              {categories.map(category => (
+                <DropdownMenuItem 
+                  key={category} 
+                  onClick={() => setFilterCategory(category)}
+                >
+                  {category}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
           
@@ -336,13 +375,20 @@ const ResultsPage = () => {
                   </div>
                 </TableHead>
                 <TableHead>Localização</TableHead>
+                <TableHead>Fonte</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredLeads.length === 0 ? (
+              {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
+                  <TableCell colSpan={8} className="h-24 text-center">
+                    Carregando dados...
+                  </TableCell>
+                </TableRow>
+              ) : filteredLeads.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="h-24 text-center">
                     Nenhum resultado encontrado.
                   </TableCell>
                 </TableRow>
@@ -354,9 +400,9 @@ const ResultsPage = () => {
                       <Badge 
                         variant="outline" 
                         className={`
-                          ${lead.category === 'Cafeteria' ? 'border-coffee-brown/50 text-coffee-brown' : ''}
-                          ${lead.category === 'Empório' ? 'border-coffee-gold/50 text-coffee-gold' : ''}
-                          ${lead.category === 'Torrefação' ? 'border-coffee-olive/50 text-coffee-olive' : ''}
+                          ${lead.category.includes('Cafeteria') ? 'border-coffee-brown/50 text-coffee-brown' : ''}
+                          ${lead.category.includes('Empório') ? 'border-coffee-gold/50 text-coffee-gold' : ''}
+                          ${lead.category.includes('Torrefação') ? 'border-coffee-olive/50 text-coffee-olive' : ''}
                         `}
                       >
                         {lead.category}
@@ -365,7 +411,7 @@ const ResultsPage = () => {
                     <TableCell>
                       <div>
                         <p>{lead.contact}</p>
-                        <p className="text-xs text-muted-foreground">{lead.email}</p>
+                        <p className="text-xs text-muted-foreground">{lead.email || 'Email não disponível'}</p>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -386,23 +432,32 @@ const ResultsPage = () => {
                       }).format(lead.potentialValue)}
                     </TableCell>
                     <TableCell>{lead.location}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className="bg-muted/80">
+                        {lead.source}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-right space-x-1">
-                      <Button 
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleContact(lead.email)}
-                      >
-                        <Mail size={14} />
-                      </Button>
-                      <Button 
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => toast.success(`Ligando para ${lead.phone}`)}
-                      >
-                        <Phone size={14} />
-                      </Button>
+                      {lead.email && (
+                        <Button 
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleContact(lead.email)}
+                        >
+                          <Mail size={14} />
+                        </Button>
+                      )}
+                      {lead.phone && (
+                        <Button 
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => toast.success(`Ligando para ${lead.phone}`)}
+                        >
+                          <Phone size={14} />
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))

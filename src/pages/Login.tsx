@@ -5,19 +5,35 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Coffee } from 'lucide-react';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signin } = useAuth();
+  const { signin, session } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirecionar se já estiver logado
+  if (session) {
+    navigate('/filtros');
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error('Por favor, preencha todos os campos');
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
       await signin(email, password);
+    } catch (error) {
+      console.error('Erro durante o login:', error);
     } finally {
       setIsLoading(false);
     }
