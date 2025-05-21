@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/context/AuthContext';
-import { Coffee, LogOut, Search, Star, ArrowDown, ArrowUp, Phone, Mail, ExportIcon, Filter } from 'lucide-react';
+import { Coffee, LogOut, Search, Star, ArrowDown, ArrowUp, Phone, Mail, Download, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Lead data interface
@@ -287,7 +286,7 @@ const ResultsPage = () => {
           </DropdownMenu>
           
           <Button className="bg-coffee-gold hover:bg-coffee-gold/90 text-black" onClick={handleExport}>
-            <ExportIcon size={16} className="mr-2" />
+            <Download size={16} className="mr-2" />
             Exportar
           </Button>
           
