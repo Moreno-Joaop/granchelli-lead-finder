@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,13 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				coffee: {
+					brown: '#4B2E2B',
+					gold: '#D4AF37',
+					olive: '#708238',
+					lighter: '#6B4240',
+					light: '#9C7A78'
 				}
 			},
 			borderRadius: {
@@ -84,11 +92,57 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0',
+					},
+					'100%': {
+						opacity: '1',
+					}
+				},
+				'pulse-opacity': {
+					'0%': {
+						opacity: '0.6',
+					},
+					'50%': {
+						opacity: '1',
+					},
+					'100%': {
+						opacity: '0.6',
+					}
+				},
+				'spin-slow': {
+					'0%': {
+						transform: 'rotate(0deg)',
+					},
+					'100%': {
+						transform: 'rotate(360deg)',
+					}
+				},
+				'float': {
+					'0%': {
+						transform: 'translateY(0px)',
+					},
+					'50%': {
+						transform: 'translateY(-10px)',
+					},
+					'100%': {
+						transform: 'translateY(0px)',
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.5s ease-out',
+				'pulse-opacity': 'pulse-opacity 2s infinite ease-in-out',
+				'spin-slow': 'spin-slow 8s linear infinite',
+				'float': 'float 3s infinite ease-in-out'
+			},
+			backgroundImage: {
+				'coffee-pattern': "url('/coffee-pattern.png')",
+				'login-bg': "url('/coffee-bg.jpg')"
 			}
 		}
 	},
