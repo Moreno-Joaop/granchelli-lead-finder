@@ -80,6 +80,9 @@ const ResultsPage = () => {
         
         if (manus3Error) throw manus3Error;
         
+        console.log('Manus2 Data:', manus2Data);
+        console.log('Manus3 Data:', manus3Data);
+        
         // Conversão dos dados para o formato unificado
         const manus2Leads: Lead[] = (manus2Data || []).map((lead: Manus2Lead, index: number) => ({
           id: `manus2-${index}`,
@@ -88,8 +91,8 @@ const ResultsPage = () => {
           contact: "Não especificado",
           email: lead["Email"],
           phone: lead["Telefone"],
-          rating: lead["Prioridade"] === "Alta" ? 5 : lead["Prioridade"] === "Média" ? 3 : 1,
-          potentialValue: getRatingValue(lead["Prioridade"]),
+          rating: getRatingValue(lead["Prioridade"]),
+          potentialValue: getPotentialValue(lead["Prioridade"]),
           location: lead["Localização"] || "Não especificada",
           source: "Manus2.0"
         }));
@@ -122,31 +125,45 @@ const ResultsPage = () => {
   
   // Funções auxiliares para conversão de dados
   const getRatingValue = (priority: string | null): number => {
-    if (!priority) return 5000;
-    switch(priority) {
-      case "Alta": return 15000;
-      case "Média": return 10000;
-      case "Baixa": return 5000;
-      default: return 5000;
+    if (!priority) return 3;
+    switch(priority.toLowerCase()) {
+      case "alta": return 5;
+      case "média": return 4;
+      case "media": return 4;
+      case "baixa": return 2;
+      default: return 3;
+    }
+  };
+  
+  const getPotentialValue = (priority: string | null): number => {
+    if (!priority) return 8000;
+    switch(priority.toLowerCase()) {
+      case "alta": return 15000;
+      case "média": return 10000;
+      case "media": return 10000;
+      case "baixa": return 5000;
+      default: return 8000;
     }
   };
   
   const getRatingFromSize = (size: string | null): number => {
     if (!size) return 3;
-    switch(size) {
-      case "Grande": return 5;
-      case "Médio": return 4;
-      case "Pequeno": return 3;
+    switch(size?.toLowerCase()) {
+      case "grande": return 5;
+      case "médio": return 4;
+      case "medio": return 4;
+      case "pequeno": return 2;
       default: return 3;
     }
   };
   
   const getValueFromSize = (size: string | null): number => {
     if (!size) return 8000;
-    switch(size) {
-      case "Grande": return 20000;
-      case "Médio": return 12000;
-      case "Pequeno": return 5000;
+    switch(size?.toLowerCase()) {
+      case "grande": return 20000;
+      case "médio": return 12000;
+      case "medio": return 12000;
+      case "pequeno": return 5000;
       default: return 8000;
     }
   };
@@ -400,9 +417,9 @@ const ResultsPage = () => {
                       <Badge 
                         variant="outline" 
                         className={`
-                          ${lead.category.includes('Cafeteria') ? 'border-coffee-brown/50 text-coffee-brown' : ''}
-                          ${lead.category.includes('Empório') ? 'border-coffee-gold/50 text-coffee-gold' : ''}
-                          ${lead.category.includes('Torrefação') ? 'border-coffee-olive/50 text-coffee-olive' : ''}
+                          ${lead.category?.includes('Cafeteria') ? 'border-coffee-brown/50 text-coffee-brown' : ''}
+                          ${lead.category?.includes('Empório') ? 'border-coffee-gold/50 text-coffee-gold' : ''}
+                          ${lead.category?.includes('Torrefação') ? 'border-coffee-olive/50 text-coffee-olive' : ''}
                         `}
                       >
                         {lead.category}
