@@ -104,7 +104,7 @@ const FilterPage = () => {
           <h1 className="text-xl font-medium">Café Granchelli</h1>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-sm opacity-75">Olá, {user?.name || 'Usuário'}</span>
+          <span className="text-sm opacity-75">Olá, {user?.email || 'Usuário'}</span>
           <Button 
             variant="ghost" 
             size="icon" 
