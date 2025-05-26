@@ -12,28 +12,15 @@ import { Coffee, LogOut, Search, Star, ArrowDown, ArrowUp, Phone, Mail, Download
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
-// Interfaces para os dados das tabelas do Supabase
-interface Manus2Lead {
-  "Nome Comercial": string | null;
-  "Tipo de Empresa": string | null;
-  "Localização": string | null;
-  "Tamanho do Negócio": string | null;
-  "Telefone": string | null;
-  "Email": string | null;
-  "Website": string | null;
-  "Redes Sociais": string | null;
-  "Prioridade": string | null;
-  "Observações": string | null;
-}
-
-interface Manus3Lead {
-  "Nome": string | null;
-  "Tipo": string | null;
-  "Cidade/Estado": string | null;
-  "Tamanho": string | null;
-  "Contato": string | null;
-  "Tipo de Café": string | null;
-  "Observações": string | null;
+// Interface para os dados da tabela Teste
+interface TesteData {
+  "Nome do estabelecimento": string;
+  "Tipo de empresa": string;
+  "Cidade e estado": string;
+  "Tamanho do negócio": string;
+  "Forma(s) de contato válida(s)": string;
+  "Tipo(s) de café vendido": string;
+  "Observações adicionais": string;
 }
 
 // Interface unificada para exibição de leads
@@ -49,6 +36,8 @@ interface Lead {
   potentialValue: number;
   location: string;
   source: string;
+  coffeeType: string;
+  observations: string;
 }
 
 const ResultsPage = () => {
@@ -66,52 +55,32 @@ const ResultsPage = () => {
     const fetchLeads = async () => {
       setIsLoading(true);
       try {
-        // Buscar dados da tabela Manus2.0
-        const { data: manus2Data, error: manus2Error } = await supabase
-          .from('Manus2.0')
+        // Buscar dados da tabela Teste
+        const { data: testeData, error: testeError } = await supabase
+          .from('teste')
           .select('*');
         
-        if (manus2Error) throw manus2Error;
+        if (testeError) throw testeError;
         
-        // Buscar dados da tabela Manus3.0
-        const { data: manus3Data, error: manus3Error } = await supabase
-          .from('Manus3.0')
-          .select('*');
-        
-        if (manus3Error) throw manus3Error;
-        
-        console.log('Manus2 Data:', manus2Data);
-        console.log('Manus3 Data:', manus3Data);
+        console.log('Teste Data:', testeData);
         
         // Conversão dos dados para o formato unificado
-        const manus2Leads: Lead[] = (manus2Data || []).map((lead: Manus2Lead, index: number) => ({
-          id: `manus2-${index}`,
-          company: lead["Nome Comercial"] || "Sem nome",
-          category: lead["Tipo de Empresa"] || "Não classificado",
-          contact: "Não especificado",
-          email: lead["Email"],
-          phone: lead["Telefone"],
-          rating: getRatingValue(lead["Prioridade"]),
-          potentialValue: getPotentialValue(lead["Prioridade"]),
-          location: lead["Localização"] || "Não especificada",
-          source: "Manus2.0"
+        const testeLeads: Lead[] = (testeData || []).map((lead: TesteData, index: number) => ({
+          id: `teste-${index}`,
+          company: lead["Nome do estabelecimento"] || "Sem nome",
+          category: lead["Tipo de empresa"] || "Não classificado",
+          contact: lead["Forma(s) de contato válida(s)"] || "Não especificado",
+          email: extractEmail(lead["Forma(s) de contato válida(s)"]),
+          phone: extractPhone(lead["Forma(s) de contato válida(s)"]),
+          rating: getRatingFromSize(lead["Tamanho do negócio"]),
+          potentialValue: getValueFromSize(lead["Tamanho do negócio"]),
+          location: lead["Cidade e estado"] || "Não especificada",
+          source: "Teste",
+          coffeeType: lead["Tipo(s) de café vendido"] || "Não especificado",
+          observations: lead["Observações adicionais"] || ""
         }));
         
-        const manus3Leads: Lead[] = (manus3Data || []).map((lead: Manus3Lead, index: number) => ({
-          id: `manus3-${index}`,
-          company: lead["Nome"] || "Sem nome",
-          category: lead["Tipo"] || "Não classificado",
-          contact: lead["Contato"] || "Não especificado",
-          email: null,
-          phone: null,
-          rating: getRatingFromSize(lead["Tamanho"]),
-          potentialValue: getValueFromSize(lead["Tamanho"]),
-          location: lead["Cidade/Estado"] || "Não especificada",
-          source: "Manus3.0"
-        }));
-        
-        // Combinar os leads
-        setLeads([...manus2Leads, ...manus3Leads]);
+        setLeads(testeLeads);
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
         toast.error("Não foi possível carregar os leads");
@@ -123,27 +92,19 @@ const ResultsPage = () => {
     fetchLeads();
   }, []);
   
-  // Funções auxiliares para conversão de dados
-  const getRatingValue = (priority: string | null): number => {
-    if (!priority) return 3;
-    switch(priority.toLowerCase()) {
-      case "alta": return 5;
-      case "média": return 4;
-      case "media": return 4;
-      case "baixa": return 2;
-      default: return 3;
-    }
+  // Funções auxiliares para extração de dados de contato
+  const extractEmail = (contact: string | null): string | null => {
+    if (!contact) return null;
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+    const match = contact.match(emailRegex);
+    return match ? match[0] : null;
   };
   
-  const getPotentialValue = (priority: string | null): number => {
-    if (!priority) return 8000;
-    switch(priority.toLowerCase()) {
-      case "alta": return 15000;
-      case "média": return 10000;
-      case "media": return 10000;
-      case "baixa": return 5000;
-      default: return 8000;
-    }
+  const extractPhone = (contact: string | null): string | null => {
+    if (!contact) return null;
+    const phoneRegex = /\(?\d{2}\)?\s?\d{4,5}-?\d{4}/;
+    const match = contact.match(phoneRegex);
+    return match ? match[0] : null;
   };
   
   const getRatingFromSize = (size: string | null): number => {
@@ -202,7 +163,8 @@ const ResultsPage = () => {
       return (
         lead.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
         lead.contact.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lead.location.toLowerCase().includes(searchTerm.toLowerCase())
+        lead.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lead.coffeeType.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     
@@ -312,7 +274,7 @@ const ResultsPage = () => {
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input 
-              placeholder="Buscar por empresa, contato ou localização..." 
+              placeholder="Buscar por empresa, contato, localização ou tipo de café..." 
               className="pl-9" 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -392,6 +354,7 @@ const ResultsPage = () => {
                   </div>
                 </TableHead>
                 <TableHead>Localização</TableHead>
+                <TableHead>Tipo de Café</TableHead>
                 <TableHead>Fonte</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -399,13 +362,13 @@ const ResultsPage = () => {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center">
+                  <TableCell colSpan={9} className="h-24 text-center">
                     Carregando dados...
                   </TableCell>
                 </TableRow>
               ) : filteredLeads.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center">
+                  <TableCell colSpan={9} className="h-24 text-center">
                     Nenhum resultado encontrado.
                   </TableCell>
                 </TableRow>
@@ -427,8 +390,9 @@ const ResultsPage = () => {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p>{lead.contact}</p>
+                        <p className="text-sm">{lead.contact}</p>
                         <p className="text-xs text-muted-foreground">{lead.email || 'Email não disponível'}</p>
+                        {lead.phone && <p className="text-xs text-muted-foreground">{lead.phone}</p>}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -449,6 +413,11 @@ const ResultsPage = () => {
                       }).format(lead.potentialValue)}
                     </TableCell>
                     <TableCell>{lead.location}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className="text-xs">
+                        {lead.coffeeType}
+                      </Badge>
+                    </TableCell>
                     <TableCell>
                       <Badge variant="secondary" className="bg-muted/80">
                         {lead.source}

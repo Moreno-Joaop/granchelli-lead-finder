@@ -78,6 +78,192 @@ export type Database = {
         }
         Relationships: []
       }
+      "Manus4.0": {
+        Row: {
+          Avaliação: number | null
+          "Cidade/Estado": string | null
+          Contato: string | null
+          Endereço: string | null
+          Nome: string | null
+          "Número de Avaliações": number | null
+          Observações: string | null
+          Prioridade: string | null
+          Tamanho: string | null
+          Tipo: string | null
+          "Tipo de Café": string | null
+        }
+        Insert: {
+          Avaliação?: number | null
+          "Cidade/Estado"?: string | null
+          Contato?: string | null
+          Endereço?: string | null
+          Nome?: string | null
+          "Número de Avaliações"?: number | null
+          Observações?: string | null
+          Prioridade?: string | null
+          Tamanho?: string | null
+          Tipo?: string | null
+          "Tipo de Café"?: string | null
+        }
+        Update: {
+          Avaliação?: number | null
+          "Cidade/Estado"?: string | null
+          Contato?: string | null
+          Endereço?: string | null
+          Nome?: string | null
+          "Número de Avaliações"?: number | null
+          Observações?: string | null
+          Prioridade?: string | null
+          Tamanho?: string | null
+          Tipo?: string | null
+          "Tipo de Café"?: string | null
+        }
+        Relationships: []
+      }
+      "Manus5.0": {
+        Row: {
+          Cidade: string | null
+          "E-mail": string | null
+          Estado: string | null
+          "Nome do Estabelecimento": string | null
+          Observações: string | null
+          "Redes Sociais": string | null
+          Site: string | null
+          "Tamanho do Negócio": string | null
+          Telefone: string | null
+          "Tipo de Empresa": string | null
+          "Tipo(s) de Café Vendido": string | null
+        }
+        Insert: {
+          Cidade?: string | null
+          "E-mail"?: string | null
+          Estado?: string | null
+          "Nome do Estabelecimento"?: string | null
+          Observações?: string | null
+          "Redes Sociais"?: string | null
+          Site?: string | null
+          "Tamanho do Negócio"?: string | null
+          Telefone?: string | null
+          "Tipo de Empresa"?: string | null
+          "Tipo(s) de Café Vendido"?: string | null
+        }
+        Update: {
+          Cidade?: string | null
+          "E-mail"?: string | null
+          Estado?: string | null
+          "Nome do Estabelecimento"?: string | null
+          Observações?: string | null
+          "Redes Sociais"?: string | null
+          Site?: string | null
+          "Tamanho do Negócio"?: string | null
+          Telefone?: string | null
+          "Tipo de Empresa"?: string | null
+          "Tipo(s) de Café Vendido"?: string | null
+        }
+        Relationships: []
+      }
+      "Manus6.0": {
+        Row: {
+          Avaliação: number | null
+          "Cidade/Estado": string | null
+          Contato: string | null
+          Endereço: string | null
+          Nome: string | null
+          "Número de Avaliações": number | null
+          Observações: string | null
+          Prioridade: string | null
+          Tamanho: string | null
+          Tipo: string | null
+          "Tipo de Café": string | null
+        }
+        Insert: {
+          Avaliação?: number | null
+          "Cidade/Estado"?: string | null
+          Contato?: string | null
+          Endereço?: string | null
+          Nome?: string | null
+          "Número de Avaliações"?: number | null
+          Observações?: string | null
+          Prioridade?: string | null
+          Tamanho?: string | null
+          Tipo?: string | null
+          "Tipo de Café"?: string | null
+        }
+        Update: {
+          Avaliação?: number | null
+          "Cidade/Estado"?: string | null
+          Contato?: string | null
+          Endereço?: string | null
+          Nome?: string | null
+          "Número de Avaliações"?: number | null
+          Observações?: string | null
+          Prioridade?: string | null
+          Tamanho?: string | null
+          Tipo?: string | null
+          "Tipo de Café"?: string | null
+        }
+        Relationships: []
+      }
+      "Manus7.0": {
+        Row: {
+          "Cidade e estado": string | null
+          "Forma(s) de contato válida(s)": string | null
+          "Nome do estabelecimento": string | null
+          "Observações adicionais": string | null
+          "Tamanho do negócio": string | null
+          "Tipo de empresa": string | null
+          "Tipo(s) de café vendido": string | null
+        }
+        Insert: {
+          "Cidade e estado"?: string | null
+          "Forma(s) de contato válida(s)"?: string | null
+          "Nome do estabelecimento"?: string | null
+          "Observações adicionais"?: string | null
+          "Tamanho do negócio"?: string | null
+          "Tipo de empresa"?: string | null
+          "Tipo(s) de café vendido"?: string | null
+        }
+        Update: {
+          "Cidade e estado"?: string | null
+          "Forma(s) de contato válida(s)"?: string | null
+          "Nome do estabelecimento"?: string | null
+          "Observações adicionais"?: string | null
+          "Tamanho do negócio"?: string | null
+          "Tipo de empresa"?: string | null
+          "Tipo(s) de café vendido"?: string | null
+        }
+        Relationships: []
+      }
+      teste: {
+        Row: {
+          "Cidade e estado": string
+          "Forma(s) de contato válida(s)": string
+          "Nome do estabelecimento": string
+          "Observações adicionais": string
+          "Tamanho do negócio": string
+          "Tipo de empresa": string
+          "Tipo(s) de café vendido": string
+        }
+        Insert: {
+          "Cidade e estado": string
+          "Forma(s) de contato válida(s)": string
+          "Nome do estabelecimento": string
+          "Observações adicionais": string
+          "Tamanho do negócio": string
+          "Tipo de empresa": string
+          "Tipo(s) de café vendido": string
+        }
+        Update: {
+          "Cidade e estado"?: string
+          "Forma(s) de contato válida(s)"?: string
+          "Nome do estabelecimento"?: string
+          "Observações adicionais"?: string
+          "Tamanho do negócio"?: string
+          "Tipo de empresa"?: string
+          "Tipo(s) de café vendido"?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
