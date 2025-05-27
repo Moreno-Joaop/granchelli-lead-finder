@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,20 +9,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useAuth } from '@/context/AuthContext';
 import { Coffee, LogOut, Search, Star, ArrowDown, ArrowUp, Phone, Mail, Download, Filter } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 
-// Interface para os dados da tabela Teste
-interface TesteData {
-  "Nome do estabelecimento": string;
-  "Tipo de empresa": string;
-  "Cidade e estado": string;
-  "Tamanho do negócio": string;
-  "Forma(s) de contato válida(s)": string;
-  "Tipo(s) de café vendido": string;
-  "Observações adicionais": string;
-}
-
-// Interface unificada para exibição de leads
+// Interface para exibição de leads
 interface Lead {
   id: string;
   company: string;
@@ -52,82 +39,134 @@ const ResultsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    const fetchLeads = async () => {
+    // Simular carregamento de dados
+    const loadSimulatedData = () => {
       setIsLoading(true);
-      try {
-        // Buscar dados da tabela Teste
-        const { data: testeData, error: testeError } = await supabase
-          .from('teste')
-          .select('*');
-        
-        if (testeError) throw testeError;
-        
-        console.log('Teste Data:', testeData);
-        
-        // Conversão dos dados para o formato unificado
-        const testeLeads: Lead[] = (testeData || []).map((lead: TesteData, index: number) => ({
-          id: `teste-${index}`,
-          company: lead["Nome do estabelecimento"] || "Sem nome",
-          category: lead["Tipo de empresa"] || "Não classificado",
-          contact: lead["Forma(s) de contato válida(s)"] || "Não especificado",
-          email: extractEmail(lead["Forma(s) de contato válida(s)"]),
-          phone: extractPhone(lead["Forma(s) de contato válida(s)"]),
-          rating: getRatingFromSize(lead["Tamanho do negócio"]),
-          potentialValue: getValueFromSize(lead["Tamanho do negócio"]),
-          location: lead["Cidade e estado"] || "Não especificada",
-          source: "Teste",
-          coffeeType: lead["Tipo(s) de café vendido"] || "Não especificado",
-          observations: lead["Observações adicionais"] || ""
-        }));
-        
-        setLeads(testeLeads);
-      } catch (error) {
-        console.error("Erro ao buscar dados:", error);
-        toast.error("Não foi possível carregar os leads");
-      } finally {
+      
+      // Dados simulados
+      const simulatedLeads: Lead[] = [
+        {
+          id: '1',
+          company: 'Café Central',
+          category: 'Cafeteria',
+          contact: 'contato@cafecentral.com.br - (11) 9999-8888',
+          email: 'contato@cafecentral.com.br',
+          phone: '(11) 9999-8888',
+          rating: 5,
+          potentialValue: 15000,
+          location: 'São Paulo, SP',
+          source: 'Análise de Mercado',
+          coffeeType: 'Especial, Gourmet',
+          observations: 'Alta movimentação, localização privilegiada'
+        },
+        {
+          id: '2',
+          company: 'Empório do Grão',
+          category: 'Empório',
+          contact: 'vendas@emporiodograo.com.br - (21) 8888-7777',
+          email: 'vendas@emporiodograo.com.br',
+          phone: '(21) 8888-7777',
+          rating: 4,
+          potentialValue: 8000,
+          location: 'Rio de Janeiro, RJ',
+          source: 'Análise de Mercado',
+          coffeeType: 'Tradicional, Especial',
+          observations: 'Foco em produtos premium'
+        },
+        {
+          id: '3',
+          company: 'Torrefação Mineira',
+          category: 'Torrefação',
+          contact: 'comercial@torrmineira.com.br - (31) 7777-6666',
+          email: 'comercial@torrmineira.com.br',
+          phone: '(31) 7777-6666',
+          rating: 5,
+          potentialValue: 25000,
+          location: 'Belo Horizonte, MG',
+          source: 'Análise de Mercado',
+          coffeeType: 'Verde, Torrado',
+          observations: 'Grande volume de produção'
+        },
+        {
+          id: '4',
+          company: 'Café Artesanal',
+          category: 'Cafeteria',
+          contact: 'info@cafeartesanal.com.br - (47) 6666-5555',
+          email: 'info@cafeartesanal.com.br',
+          phone: '(47) 6666-5555',
+          rating: 4,
+          potentialValue: 12000,
+          location: 'Florianópolis, SC',
+          source: 'Análise de Mercado',
+          coffeeType: 'Especial, Orgânico',
+          observations: 'Foco em sustentabilidade'
+        },
+        {
+          id: '5',
+          company: 'Mercado Gourmet',
+          category: 'Empório',
+          contact: 'compras@mercadogourmet.com.br - (85) 5555-4444',
+          email: 'compras@mercadogourmet.com.br',
+          phone: '(85) 5555-4444',
+          rating: 3,
+          potentialValue: 6000,
+          location: 'Fortaleza, CE',
+          source: 'Análise de Mercado',
+          coffeeType: 'Gourmet, Especial',
+          observations: 'Rede com múltiplas lojas'
+        },
+        {
+          id: '6',
+          company: 'Café Express',
+          category: 'Cafeteria',
+          contact: 'pedidos@cafeexpress.com.br - (62) 4444-3333',
+          email: 'pedidos@cafeexpress.com.br',
+          phone: '(62) 4444-3333',
+          rating: 3,
+          potentialValue: 9000,
+          location: 'Goiânia, GO',
+          source: 'Análise de Mercado',
+          coffeeType: 'Tradicional, Especial',
+          observations: 'Atendimento rápido, alto volume'
+        },
+        {
+          id: '7',
+          company: 'Grãos Especiais',
+          category: 'Torrefação',
+          contact: 'vendas@graosespeciais.com.br - (71) 3333-2222',
+          email: 'vendas@graosespeciais.com.br',
+          phone: '(71) 3333-2222',
+          rating: 4,
+          potentialValue: 18000,
+          location: 'Salvador, BA',
+          source: 'Análise de Mercado',
+          coffeeType: 'Especial, Premium',
+          observations: 'Certificação orgânica'
+        },
+        {
+          id: '8',
+          company: 'Casa do Café',
+          category: 'Empório',
+          contact: 'atendimento@casadocafe.com.br - (81) 2222-1111',
+          email: 'atendimento@casadocafe.com.br',
+          phone: '(81) 2222-1111',
+          rating: 5,
+          potentialValue: 14000,
+          location: 'Recife, PE',
+          source: 'Análise de Mercado',
+          coffeeType: 'Gourmet, Tradicional',
+          observations: 'Tradição familiar, 30 anos no mercado'
+        }
+      ];
+      
+      setTimeout(() => {
+        setLeads(simulatedLeads);
         setIsLoading(false);
-      }
+      }, 1000);
     };
     
-    fetchLeads();
+    loadSimulatedData();
   }, []);
-  
-  // Funções auxiliares para extração de dados de contato
-  const extractEmail = (contact: string | null): string | null => {
-    if (!contact) return null;
-    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
-    const match = contact.match(emailRegex);
-    return match ? match[0] : null;
-  };
-  
-  const extractPhone = (contact: string | null): string | null => {
-    if (!contact) return null;
-    const phoneRegex = /\(?\d{2}\)?\s?\d{4,5}-?\d{4}/;
-    const match = contact.match(phoneRegex);
-    return match ? match[0] : null;
-  };
-  
-  const getRatingFromSize = (size: string | null): number => {
-    if (!size) return 3;
-    switch(size?.toLowerCase()) {
-      case "grande": return 5;
-      case "médio": return 4;
-      case "medio": return 4;
-      case "pequeno": return 2;
-      default: return 3;
-    }
-  };
-  
-  const getValueFromSize = (size: string | null): number => {
-    if (!size) return 8000;
-    switch(size?.toLowerCase()) {
-      case "grande": return 20000;
-      case "médio": return 12000;
-      case "medio": return 12000;
-      case "pequeno": return 5000;
-      default: return 8000;
-    }
-  };
   
   // Sorting function
   const sortedLeads = [...leads].sort((a, b) => {

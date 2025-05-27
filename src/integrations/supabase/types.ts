@@ -264,6 +264,36 @@ export type Database = {
         }
         Relationships: []
       }
+      teste2: {
+        Row: {
+          "Cidade e estado": string | null
+          "Forma(s) de contato válida(s)": string | null
+          "Nome do estabelecimento": string
+          "Observações adicionais": string | null
+          "Tamanho do negócio": string | null
+          "Tipo de empresa": string | null
+          "Tipo(s) de café vendido": string | null
+        }
+        Insert: {
+          "Cidade e estado"?: string | null
+          "Forma(s) de contato válida(s)"?: string | null
+          "Nome do estabelecimento": string
+          "Observações adicionais"?: string | null
+          "Tamanho do negócio"?: string | null
+          "Tipo de empresa"?: string | null
+          "Tipo(s) de café vendido"?: string | null
+        }
+        Update: {
+          "Cidade e estado"?: string | null
+          "Forma(s) de contato válida(s)"?: string | null
+          "Nome do estabelecimento"?: string
+          "Observações adicionais"?: string | null
+          "Tamanho do negócio"?: string | null
+          "Tipo de empresa"?: string | null
+          "Tipo(s) de café vendido"?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
